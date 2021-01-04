@@ -1,0 +1,10 @@
+fastapi 
+uvicorn[standard]
+jinja2
+aiofiles
+google-api-python-client 
+google-auth-httplib2 
+google-auth-oauthlib
+iso8601
+pytz
+timetree-sdk

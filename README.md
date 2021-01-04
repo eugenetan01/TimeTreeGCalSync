@@ -6,7 +6,9 @@ This runs on Google Calendar API, Google Calendar push notifications and Timetre
 If you'd like to set up your google calendar web hook for push notifications, please refer to this:
 https://developers.google.com/calendar/v3/push
 
-To start, please follow this tutorial to generate a credentials.json file and a token.pickle to authenticate your google calendar access:
+After finishing setting up the necessary steps for push notifications, pls add your web hook url to the server.py file and run the script to send a POST request to google API - Google will begin sending watch notifications to your webhook when there are event changes in your calendar.
+
+To start also, please follow this tutorial to generate a credentials.json file and a token.pickle to authenticate your google calendar access:
 https://developers.google.com/people/quickstart/python
 
 Please also add 2 fields: "TIMETREETOKEN" and "TIMETREECALENDARID" to the end of the credentials.json file to access your timetree calendar.
