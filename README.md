@@ -1,5 +1,7 @@
 # TimeTreeGCalSync
-This web service syncs your Google calendar with your TimeTree Calendar 
+This web service syncs your Google calendar with your TimeTree Calendar
+
+This REST-ful web service was built on FastAPI using Python.
 
 This runs on Google Calendar API, Google Calendar push notifications and Timetree-sdk
 
