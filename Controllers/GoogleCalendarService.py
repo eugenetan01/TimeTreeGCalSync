@@ -1,7 +1,7 @@
 from __future__ import print_function
 import datetime
-import AuthenticationService as authController
-import TimetreeService as TTService
+import Controllers.AuthenticationService as authController
+import Controllers.TimetreeService as TTService
 from googleapiclient.discovery import build
 
 global glob_event 

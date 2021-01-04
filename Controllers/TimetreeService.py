@@ -1,6 +1,6 @@
 from timetree_sdk import TimeTreeApi
 from timetree_sdk.models import events
-import AuthenticationService as AuthenticationService
+import Controllers.AuthenticationService as AuthenticationService
 import json
 
 api = TimeTreeApi(AuthenticationService.getTimeTreeToken())
