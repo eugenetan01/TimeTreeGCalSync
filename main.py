@@ -23,16 +23,29 @@ templates = Jinja2Templates(directory="templates")
 def read_root(request: Optional[str] = None):
     return {"Hello": "World"}
 
-@app.post("/notifications")
-async def notification(request: Request):  
-    try:
-        code = googleService.googleCalSync()
-        print(code)
-        return {"status": 200}
-    except:
-        return {"status": "Error cannot create on Timetree"}
-    finally: 
-        googleService.glob_event = googleService.getLastUpdatedEvents()
+@app.post("/<web_hook>")
+def notification(request: Request):  
+
+    lastUpdatetList = googleService.getLastUpdatedEvents()
+    currList = googleService.currentList(lastUpdatetList)
+    prevList = googleService.prevList()
+    code = 0
+    if len(prevList) > len(currList):
+        itemsToDelete = list(set(prevList) - set(currList))  
+        code = googleService.syncDeleteTTItem(itemsToDelete)
+    elif len(currList) > len(prevList):
+        itemsToAdd = list(set(currList) - set(prevList))
+        code = googleService.syncAddTTItem(itemsToAdd, lastUpdatetList)
+    elif len(currList) == len(prevList):
+        oldName = list(set(prevList) - set(currList))
+        newName = list(set(currList) - set(prevList))
+        if oldName and newName:
+            code = googleService.syncUpdateTTItemName(oldName, newName)
+        else:
+            code = googleService.syncUpdateTTItem(lastUpdatetList)
+    
+    googleService.glob_event = googleService.getLastUpdatedEvents()
+    return code
 
 @app.get("/<to add>") #google verification html file for registering push notification
 async def read_item():

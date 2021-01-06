@@ -35,11 +35,8 @@ def createEvent(summary, start, end):
             )
         )
     )
-    try:
-        response = api.create_event(getCalendarId(), event)
-    except:
-        raise "Err 500: Error creating event" 
-
+    response = api.create_event(getCalendarId(), event)
+    
     print(response.data.attributes.title) # Title
     return True
 

@@ -4,8 +4,6 @@ import Controllers.AuthenticationService as authController
 import Controllers.TimetreeService as TTService
 from googleapiclient.discovery import build
 
-global glob_event 
-
 def getLastUpdatedEvents():
     creds = authController.auth()
 
@@ -22,40 +20,87 @@ def getLastUpdatedEvents():
         print('No upcoming events found.')
     for event in events:
         start = event['updated']
+        print(start, event['summary'])
+
     return events  
 
-def googleCalSync():
-    lastUpdatedEvents = getLastUpdatedEvents()
-    googList = []
-    lastUpdate = []
+glob_event = getLastUpdatedEvents()
 
+def currentList(lastUpdatedEvents):
+    googList = []
+    for j in lastUpdatedEvents:
+        googList.append(j['summary'])
+    return googList
+
+def prevList():
+    lastUpdate = []
     if glob_event:
         for i in glob_event:
             lastUpdate.append(i['summary'])
-
-    for j in lastUpdatedEvents:
-        googList.append(j['summary'])
-
-    deleteFlag = False
-    if lastUpdate:
-        titleDiff = list(set(lastUpdate) - set(googList))
-        for i in titleDiff:
-            if i not in googList:
-                deleteFlag = True
-
-    # To delete item from TT
-    if deleteFlag:
-        for i in titleDiff:
-            eventId = TTService.findEvent(i)
-            code = TTService.deleteEvent(eventId)
-            print(code)
     else:
-        # To add new item to TT
-        eventTTExists = TTService.findEvent(lastUpdatedEvents[0]['summary'])
+        print("nothing to show in glob event")
+    return lastUpdate
+
+def syncDeleteTTItem(items):
+    code = 500
+    for item in items:
+        eventTTExists = TTService.findEvent(item)
         if eventTTExists:
             code = TTService.deleteEvent(eventTTExists)
-            print(code)
-        start = lastUpdatedEvents[0]['start'].get('dateTime', lastUpdatedEvents[0]['start'].get('date'))
-        end = lastUpdatedEvents[0]['end'].get('dateTime', lastUpdatedEvents[0]['end'].get('date'))
-        res = TTService.createEvent(lastUpdatedEvents[0]['summary'], start, end)
-        return 200
+    return code
+
+def syncAddTTItem(items, lastUpdatedEvents):
+    if items:
+        res = syncDeleteTTItem(items)
+    
+        for index in range(len(items)):
+            start = lastUpdatedEvents[index]['start'].get('dateTime', lastUpdatedEvents[index]['start'].get('date'))
+            end = lastUpdatedEvents[index]['end'].get('dateTime', lastUpdatedEvents[index]['end'].get('date'))
+            res = TTService.createEvent(lastUpdatedEvents[index]['summary'], start, end)
+        
+        return res
+    
+    else:
+        return 500
+
+def invokeCreateTTItem(event, currStart, currEnd):
+    code = 504
+
+    success = TTService.createEvent(event, currStart, currEnd)
+    if success: 
+        code = 200
+        
+    return code
+
+def syncUpdateTTItemName(oldName, newName):
+    code = 500
+    code = syncDeleteTTItem(oldName)
+    
+    for j in newName:
+        for i in getLastUpdatedEvents():
+            if i['summary'] == j:
+                currStart = i['start'].get('dateTime', i['start'].get('date'))
+                currEnd = i['end'].get('dateTime', i['end'].get('date'))
+                code = invokeCreateTTItem(j, currStart, currEnd)    
+
+    return code 
+
+def syncUpdateTTItem(lastUpdatedEvents):
+    code = 400
+    if lastUpdatedEvents:
+        for i in range(len(lastUpdatedEvents)):
+            for j in range(len(glob_event)):
+                flag = False
+                if lastUpdatedEvents[i]['summary'] == glob_event[j]['summary']:
+                    currStart = lastUpdatedEvents[i]['start'].get('dateTime', lastUpdatedEvents[i]['start'].get('date'))
+                    prevStart = glob_event[j]['start'].get('dateTime', glob_event[j]['start'].get('date'))
+
+                    currEnd = lastUpdatedEvents[i]['end'].get('dateTime', lastUpdatedEvents[i]['end'].get('date'))
+                    prevEnd = lastUpdatedEvents[j]['end'].get('dateTime', lastUpdatedEvents[j]['end'].get('date'))
+                    if currStart != prevStart or currEnd != prevEnd:
+                        flag = True
+                if flag:
+                    code = syncDeleteTTItem([lastUpdatedEvents[i]['summary']])
+                    code = invokeCreateTTItem(lastUpdatedEvents[i]['summary'], currStart, currEnd)
+
+    return code
