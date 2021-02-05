@@ -22,3 +22,7 @@ The Timetree calendar Id you'd like to edit is found in the end of your calendar
 
 Please place the credentials.json and the token.pickle and change the file path as per your choosing in the project location 
   - For Heroku deployments, please follow my project structure and place these 2 files in project root
+
+Note:
+- Please refer to GlobalStore.json before deploying this project.
+- Set up a cron job to call the refresh webhook monthly because the Google Push Notifications channel expires every month. 
