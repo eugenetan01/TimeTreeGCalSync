@@ -37,7 +37,6 @@ def createEvent(summary, start, end):
     )
     response = api.create_event(getCalendarId(), event)
     
-    print(response.data.attributes.title) # Title
     return True
 
 def getALlEvents():

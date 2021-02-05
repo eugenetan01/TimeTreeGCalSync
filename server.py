@@ -12,6 +12,7 @@ import uuid
 import http.server
 import socketserver
 
+#Run this script once locally to set up the notification webhook to your webapp
 def watcher():
     creds = authController.auth()
 
@@ -20,10 +21,12 @@ def watcher():
     eventcollect = {
         'id': str(uuid.uuid1()),
         'type': "web_hook",
-        'address': "<to add>"
+        'address': "https://changeThis.herokuapp.com/path/to/hook",
+        "params": {
+            "ttl": 2592000000
+        }
     }
 
     res = service.events().watch(calendarId='primary', body=eventcollect).execute()
-    print(res)
 
 watcher()
